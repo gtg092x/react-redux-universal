@@ -103,7 +103,11 @@ const universal = (
           if (!universalState) {
             onReadyChange(false, eventProps);
             this.props.universalSetRequest(ukey);
-            Promise.resolve(promiseCreator(this.getParams(eventProps, context), eventProps.dispatch, context))
+            Promise.resolve(promiseCreator(
+              this.getParams(eventProps, context),
+              eventProps.dispatch,
+              context,
+            ))
               .then((result) => {
                 onDone(result, eventProps);
                 return this.props.universalSetResult(ukey, result);
