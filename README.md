@@ -1,6 +1,6 @@
 # React Redux Universal
 
-Universal apps with `redux`.
+Universal apps with `redux`. :stars:
 
 ## Installation
 
