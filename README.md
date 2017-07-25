@@ -103,6 +103,8 @@ export default function server(req, res) {
   </body>
 </html>`
       );
+    }).catch((err) => {
+      // possible timeout or error while rendering
     });
 }
 ```
