@@ -14,7 +14,7 @@ Universal apps with `redux`. :stars:
 import React from 'react';
 import universal from 'react-redux-universal';
 
-function resolveCoolData(myCoolParam) {
+function resolveCoolData(myCoolParam, dispatch) {
   return Promise.resolve(coolParam + ' is pretty cool');
 }
 
