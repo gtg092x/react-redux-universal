@@ -123,7 +123,7 @@ The default export for `react-redux-universal` is the HOC that links your async 
 - `promiseCreator` A function that accepts the result of `mapPropsToParams` and returns a thenable or constant value. The results of this are passed to the component as a prop and stored in a redux store for tranfer between server and client. For convenience, context is passed to this method as well.
 - `[config]`
     - `[config.getComponentId]` A method that accepts a `Component` and returns a unique id for it. Defaults to the Component name. This is important if you have different components loading keys with the same name.
-    - `[config.onReadyChange]` A method that accepts `(readyStatus, props, dispatch)`. When the promise is completed or initialized, this will fire.
+    - `[config.onReadyChange]` A method that accepts `(readyStatus, props)`. When the promise is completed or initialized, this will fire.
     - `[config.onDone]` A method that accepts `(promiseResult, props)`. When the promise is resolved, this will fire.
     - `[config.onError]` A method that accepts `(promiseError, props)`. When the promise is rejected, this will fire.
 
