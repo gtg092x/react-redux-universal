@@ -3,6 +3,7 @@ import checksum from 'json-checksum';
 import PropTypes from 'prop-types';
 import errorToJSON from 'error-to-json';
 import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { omit } from './util';
 import { setResult, setRequest, setError, clear } from './reducer';
 
@@ -11,10 +12,15 @@ const selectUniversalState = key => state => state.universal[key];
 const getDisplayName = Component =>
   Component.displayName || Component.name || 'Component';
 
-const defaults = (target, ...args) => Object.assign({}, target, ...args);
+const defaults = (target, ...args) => Object.assign({}, ...args, target);
+const noop = () => {};
 
 const OPTIONS_DEFAULTS = {
   getComponentId: getDisplayName,
+  onReadyChange: noop,
+  onError: noop,
+  onDone: noop,
+  onClear: noop,
 };
 
 const universal = (
@@ -24,16 +30,23 @@ const universal = (
   options = {}) => {
   const {
     getComponentId,
+    onReadyChange,
+    onError,
+    onDone,
+    onClear,
   } = defaults(options, OPTIONS_DEFAULTS);
   return Component =>
     connect(
       state => ({ universalState: selectUniversalState(key)(state) }),
-      {
-        universalSetResult: setResult.bind(null, key),
-        universalSetRequest: setRequest.bind(null, key),
-        universalSetError: setError.bind(null, key),
-        universalClear: clear.bind(null, key),
-      },
+      dispatch => ({
+        ...bindActionCreators({
+          universalSetResult: setResult.bind(null, key),
+          universalSetRequest: setRequest.bind(null, key),
+          universalSetError: setError.bind(null, key),
+          universalClear: clear.bind(null, key),
+        }, dispatch),
+        dispatch,
+      }),
     )(
       class UniversalWrapper extends React.Component {
         constructor() {
@@ -52,10 +65,14 @@ const universal = (
           universalSetResult: PropTypes.func,
           universalSetError: PropTypes.func,
           universalSetRequest: PropTypes.func,
+          dispatch: PropTypes.func,
           universalState: PropTypes.object,
         };
         componentWillMount() {
           this.load();
+        }
+        componentWillUnMount() {
+          this.unload();
         }
         componentWillReceiveProps(newProps, newContext) {
           if (this.getUniqueKey(newProps, newContext) !== this.getUniqueKey()) {
@@ -69,6 +86,7 @@ const universal = (
         unload(props = this.props) {
           const ukey = this.getUniqueKey(props);
           this.props.universalClear(ukey);
+          onClear();
         }
         getUniversalState(props = this.props, context = this.context) {
           const ukey = this.getUniqueKey(props, context);
@@ -78,13 +96,22 @@ const universal = (
         load(props = this.props, context = this.context) {
           const ukey = this.getUniqueKey(props, context);
           const universalState = this.getUniversalState(props, context);
+          const eventProps = omit(
+            props,
+            Object.keys(UniversalWrapper.propTypes).filter(item => item !== 'dispatch'),
+          );
           if (!universalState) {
+            onReadyChange(false, eventProps);
             this.props.universalSetRequest(ukey);
             Promise.resolve(promiseCreator(this.getParams(props, context), context))
-              .then(result => this.props.universalSetResult(ukey, result))
+              .then(result => {
+                onDone(result, eventProps);
+                return this.props.universalSetResult(ukey, result);
+              })
               .catch((error) => {
-                this.props.universalSetError(ukey, errorToJSON(error));
-              });
+                onError(error, eventProps);
+                this.props.universalSetError(ukey, error ? errorToJSON(error) : { message: 'Error' });
+              }).then(() => onReadyChange(true, eventProps));
           }
         }
         getUniqueKey(props = this.props, context = this.context) {
@@ -114,6 +141,6 @@ const universal = (
           return <Component {...params} {...componentProps} />;
         }
       });
-}
+};
 
 export default universal;

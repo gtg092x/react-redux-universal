@@ -1,4 +1,5 @@
 import { omit } from './util';
+
 const RESULT = '@react-universal/RESULT';
 const REQUEST = '@react-universal/REQUEST';
 const ERROR = '@react-universal/ERROR';
@@ -14,7 +15,7 @@ export default function (state = {}, action = {}) {
           ...(state[action.key] || {}),
           [action.hash]: {
             result: action.data,
-          }
+          },
         },
       };
     case REQUEST:
@@ -24,7 +25,7 @@ export default function (state = {}, action = {}) {
           ...(state[action.key] || {}),
           [action.hash]: {
             request: true,
-          }
+          },
         },
       };
     case CLEAR:
@@ -41,7 +42,7 @@ export default function (state = {}, action = {}) {
           ...(state[action.key] || {}),
           [action.hash]: {
             error: action.error,
-          }
+          },
         },
       };
     default:

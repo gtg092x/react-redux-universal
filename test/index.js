@@ -123,6 +123,41 @@ describe('universal redux.', () => {
       done();
     });
   });
+  it('loader should mutate state in promise lifecycles', done => {
+    const keyParam = 'testParam';
+    const store = createStore(reducer);
+
+    const enhancer = universalContainer(
+      'testKey',
+      ({ myParam }) => myParam,
+      myParam => Promise.resolve(myParam),
+      {
+        onDone: (result, { dispatch }) => dispatch({
+          type: KVP,
+          data: 'bar',
+          key: 'foo',
+        }),
+      }
+    );
+
+    const Component = enhancer(({ testKey }) => {
+      return null;
+    });
+
+    const Element = (
+      <Provider store={store}>
+        <Component myParam={keyParam} />
+      </Provider>
+    );
+
+    loader(
+      () => renderToStaticMarkup(Element),
+      store,
+    ).then(({ state }) => {
+      assert.deepEqual(state.simpleKvp, {foo: 'bar'});
+      done();
+    });
+  });
   it('no loaders should render once', done => {
 
     const Component = () => <div></div>;
@@ -141,6 +176,66 @@ describe('universal redux.', () => {
       store,
     ).then(({ html, state }) => {
       assert.equal(renderCount, 1);
+      done();
+    })
+  });
+  it('should fire lots of events', done => {
+
+    let readyChange = false;
+    let doneChange = false;
+    const enhancer = universalContainer(
+      'testKey',
+      ({ myParam }) => myParam,
+      myParam => Promise.resolve(myParam),
+      {
+        onReadyChange: () => readyChange = true,
+        onDone: () => doneChange = true,
+      }
+    );
+
+    const Component = enhancer(() => (<div></div>));
+    const store = createStore(reducer);
+    const Element = (
+      <Provider store={store}>
+        <Component />
+      </Provider>
+    );
+    loader(
+      () => renderToStaticMarkup(Element),
+      store,
+    ).then(() => {
+      assert(readyChange, 'Ready change not set');
+      assert(doneChange, 'Done change not set');
+      done();
+    })
+  });
+  it('should fire errors', done => {
+
+    let errorChange = false;
+    const enhancer = universalContainer(
+      'testKey',
+      ({ myParam }) => myParam,
+      myParam => Promise.reject(myParam),
+      {
+        onError: (err, props) => {
+          assert(!!props.dispatch, 'Dispatch not passed');
+          errorChange = true;
+        },
+      }
+    );
+
+    const Component = enhancer(() => (<div></div>));
+    const store = createStore(reducer);
+    const Element = (
+      <Provider store={store}>
+        <Component myParam="myError" />
+      </Provider>
+    );
+    loader(
+      () => renderToStaticMarkup(Element),
+      store,
+    ).then(() => {
+      assert(errorChange, 'Error change not set');
       done();
     })
   });
