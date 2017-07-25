@@ -1,10 +1,10 @@
-# React ISO
+# React Redux Universal
 
 Universal apps with `redux`.
 
 ## Installation
 
-`npm i react-redux-iso --save`
+`npm i react-redux-universal --save`
 
 ## Usage
 
@@ -12,15 +12,15 @@ Universal apps with `redux`.
 
 ```js
 import React from 'react';
-import iso from 'react-redux-iso';
+import universal from 'react-redux-universal';
 
 function resolveCoolData(myCoolParam) {
   return Promise.resolve(coolParam + ' is pretty cool');
 }
 
-const isoEnhancer = iso('myParam', props => props.myCoolParam, resolveCoolData);
+const universalEnhancer = universal('myParam', props => props.myCoolParam, resolveCoolData);
 
-const MyAsyncComponent = isoEnhancer(
+const MyAsyncComponent = universalEnhancer(
   ({ myParam, myParamReady, myParamError }) =>
     <div>Look at this awesome async data! {myParam}</div>
 );
@@ -32,11 +32,11 @@ export default MyAsyncComponent;
 
 ```js
 import { createStore, combineReducers } from 'redux';
-import { reducer as iso } from 'react-redux-iso';
+import { reducer as universal } from 'react-redux-universal';
 
 export default function createAppStore(state) {
   const reducer = combineReducers({
-    iso,
+    universal,
     // other reducers - it's a normal old redux store
   });
   return createStore(reducer, state);
@@ -109,11 +109,11 @@ export default function server(req, res) {
 
 ## API
 
-### ISO Enhancer
+### Universal Enhancer
 
-`iso(<keyName>, <mapPropsToParams>, <promiseCreator>, [<config>])`
+`universal(<keyName>, <mapPropsToParams>, <promiseCreator>, [<config>])`
 
-The default export for `react-redux-iso` is the HOC that links your async state to a redux store.
+The default export for `react-redux-universal` is the HOC that links your async state to a redux store.
 
 - `keyName` This is the prop name used for your enhanced component. Three properties will be passed:
     - `{keyname}` - the result of the promise
@@ -122,15 +122,15 @@ The default export for `react-redux-iso` is the HOC that links your async state 
 - `mapPropsToParams` This method that accepts `(props, context)` and returns a value to be the params passed to the `promiseCreator`. This will be called on initialization and every prop change. If the result of this function changes, the `promiseCreator` will be called again.
 - `promiseCreator` A function that accepts the result of `mapPropsToParams` and returns a thenable or constant value. The results of this are passed to the component as a prop and stored in a redux store for tranfer between server and client. For convenience, context is passed to this method as well.
 - `[config]`
-    - `[config.selectIsoState]` A method that selects the isoState from the reducer. It defaults to assuming that `iso` is the reducer name and is part of a combinedReducer. This must return the entire iso reducer.
+    - `[config.getComponentId]` A method that takes a `Component` and returns a unique id for it. Defaults to the Component name. This is important if you have different components loading keys with the same name.
 
 ### Loader
 
 `loader(<getRenderer>, <store>, [<timeout>])`
 
-This will attempt to load your app and resolve as soon as all mounted `iso` composers have resolved.
+This will attempt to load your app and resolve as soon as all mounted `universal` composers have resolved.
 
-- `getRenderer` This is typically `() => ReactDOMServer.renderToString(<App />)`, however, you can pass any render method you like as long as it attempts to render your react app. If you have mounted iso components, this will likely be called twice but could be called more. Otherwise, this will be called once.
+- `getRenderer` This is typically `() => ReactDOMServer.renderToString(<App />)`, however, you can pass any render method you like as long as it attempts to render your react app. If you have mounted universal components, this will likely be called twice but could be called more. Otherwise, this will be called once.
 - `store` Your redux store. You'll need to initialize this outside of your app. *Note: this is only the case for server side rendering.*
 - `[<timeout>]` A timeout for your app's load. The loader will reject once this time has expired. Pass `-1` if you do not want your app to timeout. Default is `3000` (3 seconds).
 
@@ -140,10 +140,10 @@ This will attempt to load your app and resolve as soon as all mounted `iso` comp
 
 `clearAll()`
 
-This will clear all iso data, causing all mounted iso components to reload on next property change.
+This will clear all universal data, causing all mounted universal components to reload on next property change.
 
 ```js
-import { clearAll } from 'react-redux-iso';
+import { clearAll } from 'react-redux-universal';
 
 store.dispatch(clearAll());
 ```
@@ -153,12 +153,12 @@ store.dispatch(clearAll());
 A preconfigured reducer. This must be in your app's root reducer.
 
 ```js
-import { reducer as iso } from 'react-redux-iso';
+import { reducer as universal } from 'react-redux-universal';
 
 const reducer = combineReducers({
-    iso,
+    universal,
     // other reducers
   });
 ```
 
-It's recommended you that you set your reducer as `iso` using `combineReducer`.
+It's recommended you that you set your reducer as `universal` using `combineReducer`.

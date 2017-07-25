@@ -1,8 +1,9 @@
 {
-  "name": "react-redux-iso",
+  "name": "react-redux-universal",
   "version": "0.0.1",
   "scripts": {
     "dev": "babel-node samples/web/server",
+    "dev:build": "babel samples/web --out-dir samples/web-build",
     "native-lib": "babel src --out-dir samples/native/iso",
     "clean": "rimraf lib",
     "test": "cross-env BABEL_ENV=commonjs mocha test/index --compilers js:babel-register --recursive",
@@ -24,7 +25,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gtg092x/react-redux-iso.git"
+    "url": "git+https://github.com/gtg092x/react-redux-universal.git"
   },
   "peerDependencies": {
     "react": "^0.14.0 || ^15.0.0-0 || ^16.0.0-0",
@@ -63,7 +64,6 @@
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.0.2",
     "react-dom": "^16.0.0-alpha.12",
-    "react-redux": "^5.0.5",
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "rimraf": "^2.5.4",

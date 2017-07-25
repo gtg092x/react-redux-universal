@@ -1,9 +1,9 @@
 import { omit } from './util';
-const RESULT = '@react-iso/RESULT';
-const REQUEST = '@react-iso/REQUEST';
-const ERROR = '@react-iso/ERROR';
-const CLEAR = '@react-iso/CLEAR';
-const CLEAR_ALL = '@react-iso/CLEAR_ALL';
+const RESULT = '@react-universal/RESULT';
+const REQUEST = '@react-universal/REQUEST';
+const ERROR = '@react-universal/ERROR';
+const CLEAR = '@react-universal/CLEAR';
+const CLEAR_ALL = '@react-universal/CLEAR_ALL';
 
 export default function (state = {}, action = {}) {
   switch (action.type) {

@@ -1,10 +1,11 @@
-const selectIso = state => state.iso;
+import { values } from './util';
 
-const values = (obj = {}) => Object.keys(obj)
-  .reduce((memo, key) => ([...memo, obj[key]]), []);
+const selectUniversal = state => state.universal;
 
-const getRequests = iso => values(iso).reduce((memo, val) =>
-  [...memo, ...values(val)], []).filter(hash => !!hash.request);
+const getUniversalCaches = universal => values(universal).reduce((memo, val) =>
+  [...memo, ...values(val)], []);
+
+const getRequests = universal => getUniversalCaches(universal).filter(hash => !!hash.request);
 
 export default function appServer(renderer, store, timeout = 30000) {
   return new Promise((resolve, reject) => {
@@ -17,14 +18,16 @@ export default function appServer(renderer, store, timeout = 30000) {
     }
     let done;
     let to;
+    let dispatched = false;
     const checkSub = () => {
-      const requests = getRequests(selectIso(store.getState()));
+      const requests = getRequests(selectUniversal(store.getState()));
       if (requests.length === 0) {
         clearTimeout(to);
         done();
         try {
-          const nextHtml = html || renderer({ store });
-          resolve({ html: nextHtml, state: store.getState() });
+          const finalState = store.getState();
+          const nextHtml = dispatched ? renderer({ store }) : html;
+          resolve({ html: nextHtml, state: finalState });
         } catch (e) {
           reject(e);
         }
@@ -32,7 +35,10 @@ export default function appServer(renderer, store, timeout = 30000) {
         html = null;
       }
     };
-    done = store.subscribe(() => setImmediate(checkSub));
+    done = store.subscribe(() => {
+      dispatched = true;
+      setImmediate(checkSub);
+    });
     if (timeout > 0) {
       to = setTimeout(() => {
         done();

@@ -4,3 +4,6 @@ export const omit = (obj, key) => {
     keysNorm.includes(oKey) ? memo : { ...memo, [oKey]: obj[oKey] }
   ), {});
 };
+
+export const values = (obj = {}) => Object.keys(obj)
+  .reduce((memo, key) => ([...memo, obj[key]]), []);

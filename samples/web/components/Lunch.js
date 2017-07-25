@@ -1,5 +1,5 @@
 import React from 'react';
-import iso from '../../../src';
+import universal from '../../../src';
 
 function resolveLunchOrder(order) {
   if (order === null) {
@@ -8,7 +8,7 @@ function resolveLunchOrder(order) {
   return new Promise((resolve, reject) => setTimeout(() => resolve(order + 1), 500));
 }
 
-const loader = iso('lunch', props => props.lunchOrder, resolveLunchOrder);
+const loader = universal('lunch', props => props.lunchOrder, resolveLunchOrder);
 
 const Home = loader(({ lunch, lunchReady, lunchError }) =>
   lunchReady ? (

@@ -1,103 +1,119 @@
 import React from 'react';
 import checksum from 'json-checksum';
+import PropTypes from 'prop-types';
 import errorToJSON from 'error-to-json';
 import { connect } from 'react-redux';
 import { omit } from './util';
 import { setResult, setRequest, setError, clear } from './reducer';
 
-const defaultSelectIsoState = key => state => state.iso[key];
+const selectUniversalState = key => state => state.universal[key];
 
-const iso = (
+const getDisplayName = Component =>
+  Component.displayName || Component.name || 'Component';
+
+const defaults = (target, ...args) => Object.assign({}, target, ...args);
+
+const OPTIONS_DEFAULTS = {
+  getComponentId: getDisplayName,
+};
+
+const universal = (
   key,
   selectParams,
   promiseCreator,
-  {
-    selectIsoState = defaultSelectIsoState,
-  } = {}) =>
-  Component =>
-  connect(
-    state => ({ isoState: selectIsoState(key)(state) }),
-    {
-      isoSetResult: setResult.bind(null, key),
-      isoSetRequest: setRequest.bind(null, key),
-      isoSetError: setError.bind(null, key),
-      isoClear: clear.bind(null, key),
-    },
-  )(
-    class IsoWrapper extends React.Component {
-      constructor() {
-        super();
-        this.getUniqueKey = this.getUniqueKey.bind(this);
-        this.load = this.load.bind(this);
-        this.unload = this.unload.bind(this);
-        this.getParams = this.getParams.bind(this);
-        this.getIsoState = this.getIsoState.bind(this);
-      }
-      static contextTypes = {
-        ...Component.contextTypes,
-      };
-      componentWillMount() {
-        this.load();
-      }
-      componentWillReceiveProps(newProps) {
-        console.log('RECEIVE', newProps.isoState);
-        if (this.getUniqueKey(newProps) !== this.getUniqueKey()) {
-          this.unload();
-          this.load(newProps);
+  options = {}) => {
+  const {
+    getComponentId,
+  } = defaults(options, OPTIONS_DEFAULTS);
+  return Component =>
+    connect(
+      state => ({ universalState: selectUniversalState(key)(state) }),
+      {
+        universalSetResult: setResult.bind(null, key),
+        universalSetRequest: setRequest.bind(null, key),
+        universalSetError: setError.bind(null, key),
+        universalClear: clear.bind(null, key),
+      },
+    )(
+      class UniversalWrapper extends React.Component {
+        constructor() {
+          super();
+          this.getUniqueKey = this.getUniqueKey.bind(this);
+          this.load = this.load.bind(this);
+          this.unload = this.unload.bind(this);
+          this.getParams = this.getParams.bind(this);
+          this.getUniversalState = this.getUniversalState.bind(this);
         }
-      }
-      getParams(props = this.props, context = this.context) {
-        return selectParams(props, context);
-      }
-      unload(props = this.props) {
-        const ukey = this.getUniqueKey(props);
-        this.props.isoClear(ukey);
-      }
-      getIsoState(props = this.props) {
-        const ukey = this.getUniqueKey(props);
-        const { isoState = {} } = props;
-        return isoState[ukey];
-      }
-      load(props = this.props) {
-        const ukey = this.getUniqueKey(props);
-        const isoState = this.getIsoState(props);
-        if (!isoState) {
-          this.props.isoSetRequest(ukey);
-          Promise.resolve(promiseCreator(this.getParams(props), this.context))
-            .then(result => this.props.isoSetResult(ukey, result))
-            .catch((error) => {
-              this.props.isoSetError(ukey, errorToJSON(error));
-            });
-        }
-      }
-      getUniqueKey(props = this.props) {
-        const params = checksum([this.getParams(props)]);
-        // eslint-disable-next-line no-underscore-dangle
-        return params;
-      }
-      render() {
-        const isoState = this.getIsoState() || {};
-        const {
-          result,
-          error,
-          request,
-        } = isoState;
-        const params = {
-          [key]: result,
-          [`${key}Ready`]: !request,
+        static contextTypes = {
+          ...Component.contextTypes,
         };
-        if (error) {
-          params[`${key}Error`] = error;
+        static propTypes = {
+          universalClear: PropTypes.func,
+          universalSetResult: PropTypes.func,
+          universalSetError: PropTypes.func,
+          universalSetRequest: PropTypes.func,
+          universalState: PropTypes.object,
+        };
+        componentWillMount() {
+          this.load();
         }
-        const componentProps = omit(this.props, [
-          'isoClear',
-          'isoSetResult',
-          'isoSetError',
-          'isoSetRequest',
-          'isoState',
-        ]);
-        return <Component {...params} {...componentProps} />;
-      }
-    });
+        componentWillReceiveProps(newProps, newContext) {
+          if (this.getUniqueKey(newProps, newContext) !== this.getUniqueKey()) {
+            this.unload();
+            this.load(newProps, newContext);
+          }
+        }
+        getParams(props = this.props, context = this.context) {
+          return selectParams(props, context);
+        }
+        unload(props = this.props) {
+          const ukey = this.getUniqueKey(props);
+          this.props.universalClear(ukey);
+        }
+        getUniversalState(props = this.props, context = this.context) {
+          const ukey = this.getUniqueKey(props, context);
+          const { universalState = {} } = props;
+          return universalState[ukey];
+        }
+        load(props = this.props, context = this.context) {
+          const ukey = this.getUniqueKey(props, context);
+          const universalState = this.getUniversalState(props, context);
+          if (!universalState) {
+            this.props.universalSetRequest(ukey);
+            Promise.resolve(promiseCreator(this.getParams(props, context), context))
+              .then(result => this.props.universalSetResult(ukey, result))
+              .catch((error) => {
+                this.props.universalSetError(ukey, errorToJSON(error));
+              });
+          }
+        }
+        getUniqueKey(props = this.props, context = this.context) {
+          const params = checksum([this.getParams(props, context)]);
+          // eslint-disable-next-line no-underscore-dangle
+          const name = getComponentId(Component) || '';
+          return `${name}:${params}`;
+        }
+        render() {
+          const universalState = this.getUniversalState() || {};
+          const {
+            result,
+            error,
+            request,
+          } = universalState;
+          const params = {
+            [key]: result,
+            [`${key}Ready`]: !request,
+          };
+          if (error) {
+            params[`${key}Error`] = error;
+          }
+          const componentProps = omit(
+            this.props,
+            Object.keys(UniversalWrapper.propTypes),
+          );
+          return <Component {...params} {...componentProps} />;
+        }
+      });
+}
 
-export default iso;
+export default universal;
