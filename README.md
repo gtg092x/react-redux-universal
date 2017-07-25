@@ -50,9 +50,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import App from './App';
-import createStore from './redux';
+import createAppStore from './redux';
 
-const store = createStore(window.REDUX_STATE);
+const store = createAppStore(window.REDUX_STATE);
 const element = (
   <Provider store={store}>
       <App />
@@ -72,7 +72,7 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { Provider } from 'react-redux';
 import App from './App';
-import createStore from './redux';
+import createAppStore from './redux';
 import { loader } from '../../src';
 
 const TIMEOUT = 3000;
@@ -81,7 +81,7 @@ const INITIAL_PROPS = {};
 
 // exporting an express middleware here
 export default function server(req, res) {
-  const store = createStore(INITIAL_STATE);
+  const store = createAppStore(INITIAL_STATE);
   return loader(
     () => ReactDOMServer.renderToString(
       <Provider store={store}>
