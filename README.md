@@ -145,7 +145,7 @@ This will attempt to load your app and resolve as soon as all mounted `universal
 
 `clearAll()`
 
-This will clear all universal data, causing all mounted universal components to reload on next property change.
+This will clear all universal data, causing all mounted universal components to reload.
 
 ```js
 import { clearAll } from 'react-redux-universal';
