@@ -73,7 +73,7 @@ import ReactDOMServer from 'react-dom/server';
 import { Provider } from 'react-redux';
 import App from './App';
 import createAppStore from './redux';
-import { loader } from '../../src';
+import { loader } from 'react-redux-universal';
 
 const TIMEOUT = 3000;
 const INITIAL_STATE = {};
