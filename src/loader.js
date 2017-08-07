@@ -7,7 +7,9 @@ const getUniversalCaches = universal => values(universal).reduce((memo, val) =>
 
 const getRequests = universal => getUniversalCaches(universal).filter(hash => !!hash.request);
 
-export default function appServer(renderer, store, timeout = 30000) {
+const taut = () => true;
+
+export default function appServer(renderer, store, timeout = 30000, next = taut) {
   return new Promise((resolve, reject) => {
     let html;
     try {
@@ -20,12 +22,12 @@ export default function appServer(renderer, store, timeout = 30000) {
     let to;
     let dispatched = false;
     const checkSub = () => {
-      const requests = getRequests(selectUniversal(store.getState()));
-      if (requests.length === 0) {
+      const finalState = store.getState();
+      const requests = getRequests(selectUniversal(finalState));
+      if (requests.length === 0 || !next(finalState)) {
         clearTimeout(to);
         done();
         try {
-          const finalState = store.getState();
           const nextHtml = dispatched ? renderer({ store }) : html;
           resolve({ html: nextHtml, state: finalState });
         } catch (e) {

@@ -123,6 +123,42 @@ describe('universal redux.', () => {
       done();
     });
   });
+  it('failed next should cancel load', done => {
+    const keyParam = 'testParam';
+    const store = createStore(reducer);
+    const longLoader = universalContainer(
+      'testKey',
+      ({ myParam }) => myParam,
+      myParam => new Promise(resolve => setTimeout(resolve, 1000, myParam)),
+    );
+    const Component = longLoader(class Component extends React.Component {
+      componentWillMount() {
+        store.dispatch({
+          type: KVP,
+          data: 'bar',
+          key: 'foo',
+        })
+      }
+      render() {
+        return <div></div>;
+      }
+    });
+    const Element = (
+      <Provider store={store}>
+        <Component myParam={keyParam} />
+      </Provider>
+    );
+
+    loader(
+      () => renderToStaticMarkup(Element),
+      store,
+      500,
+      () => false,
+    ).then(({}) => {
+      assert(true, 'Should not hit timeout');
+      done();
+    });
+  });
   it('loader should mutate state in promise lifecycles', done => {
     const keyParam = 'testParam';
     const store = createStore(reducer);
