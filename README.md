@@ -170,4 +170,4 @@ const reducer = combineReducers({
   });
 ```
 
-Set your reducer as `universal` using `combineReducer`.
+Set your reducer as `universal` using `combineReducers`.
