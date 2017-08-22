@@ -11,14 +11,8 @@ const taut = () => true;
 
 export default function appServer(renderer, store, timeout = 30000, next = taut) {
   return new Promise((resolve, reject) => {
-    let html;
-    try {
-      html = renderer({ store });
-    } catch (e) {
-      reject(e);
-      return;
-    }
     let done;
+    let html;
     let to;
     let dispatched = false;
     const checkSub = () => {
@@ -41,6 +35,12 @@ export default function appServer(renderer, store, timeout = 30000, next = taut)
       dispatched = true;
       setImmediate(checkSub);
     });
+    try {
+      html = renderer({ store });
+    } catch (e) {
+      reject(e);
+      return;
+    }
     if (timeout > 0) {
       to = setTimeout(() => {
         done();
