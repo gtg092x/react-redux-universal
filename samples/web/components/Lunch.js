@@ -8,11 +8,15 @@ function resolveLunchOrder(order) {
   return new Promise((resolve, reject) => setTimeout(() => resolve(order + 1), 500));
 }
 
-const loader = universal('lunch', props => props.lunchOrder, resolveLunchOrder);
+const shouldComponentReload = (oldCnt, newCnt) => newCnt !== 3;
+
+const loader = universal('lunch', props => props.lunchOrder, resolveLunchOrder, {
+  shouldComponentReload,
+});
 
 const Home = loader(({ lunch, lunchReady, lunchError }) =>
   lunchReady ? (
-    <div style={lunchError ? {backgroundColor: 'red'} : {}}>Home {lunch} {lunchError && lunchError.message}</div>
+    <div style={lunchError ? {backgroundColor: 'red'} : {}}>Lunches eaten {lunch} {lunchError && lunchError.message}</div>
   ) : (
     <div>Loading</div>
   )

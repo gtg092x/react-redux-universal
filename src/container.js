@@ -21,6 +21,7 @@ const OPTIONS_DEFAULTS = {
   onError: noop,
   onDone: noop,
   onClear: noop,
+  shouldComponentReload: () => true,
 };
 
 const universal = (
@@ -34,6 +35,7 @@ const universal = (
     onError,
     onDone,
     onClear,
+    shouldComponentReload,
   } = defaults(options, OPTIONS_DEFAULTS);
   return Component =>
     connect(
@@ -56,6 +58,7 @@ const universal = (
           this.unload = this.unload.bind(this);
           this.getParams = this.getParams.bind(this);
           this.getUniversalState = this.getUniversalState.bind(this);
+          this.shouldReload = this.shouldReload.bind(this);
         }
         static contextTypes = {
           ...Component.contextTypes,
@@ -74,8 +77,12 @@ const universal = (
         componentWillUnMount() {
           this.unload();
         }
+        shouldReload(newProps, newContext) {
+          return this.getUniqueKey(newProps, newContext) !== this.getUniqueKey()
+            && shouldComponentReload(this.getParams(), this.getParams(newProps, newContext));
+        }
         componentWillReceiveProps(newProps, newContext) {
-          if (this.getUniqueKey(newProps, newContext) !== this.getUniqueKey()) {
+          if (this.shouldReload(newProps, newContext)) {
             this.unload();
             this.load(false, newProps, newContext);
           }

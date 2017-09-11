@@ -1,6 +1,6 @@
 {
   "name": "react-redux-universal",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "scripts": {
     "dev": "babel-node samples/web/server",
     "dev:build": "babel samples/web --out-dir samples/web-build",
@@ -9,7 +9,6 @@
     "test": "cross-env BABEL_ENV=commonjs mocha test/index --compilers js:babel-register --recursive",
     "memory": "babel-node test/memory-leak-check",
     "test:watch": "npm test -- --watch",
-    "test:examples": "babel-node examples/",
     "cover": "cross-env BABEL_ENV=commonjs istanbul cover _mocha -- --compilers js:babel-register --recursive",
     "lint": "eslint src test",
     "build": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
@@ -19,7 +18,9 @@
   "dependencies": {
     "error-to-json": "^1.1.0",
     "json-checksum": "^0.1.4",
-    "prop-types": ">=15.5.10"
+    "prop-types": ">=15.5.10",
+    "react": "^16.0.0-beta.5",
+    "react-redux": "^5.0.6"
   },
   "files": [
     "lib"
@@ -43,7 +44,6 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "babel": "^6.5.2",
     "babel-cli": "^6.24.1",
     "babel-core": "^6.25.0",
     "babel-eslint": "^7.2.3",
