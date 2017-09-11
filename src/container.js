@@ -77,7 +77,7 @@ const universal = (
         componentWillReceiveProps(newProps, newContext) {
           if (this.getUniqueKey(newProps, newContext) !== this.getUniqueKey()) {
             this.unload();
-            this.load(newProps, newContext);
+            this.load(false, newProps, newContext);
           }
         }
         getParams(props = this.props, context = this.context) {
@@ -93,14 +93,14 @@ const universal = (
           const { universalState = {} } = props;
           return universalState[ukey];
         }
-        load(props = this.props, context = this.context) {
+        load(force = false, props = this.props, context = this.context) {
           const ukey = this.getUniqueKey(props, context);
           const universalState = this.getUniversalState(props, context);
           const eventProps = omit(
             props,
             Object.keys(UniversalWrapper.propTypes).filter(item => item !== 'dispatch'),
           );
-          if (!universalState) {
+          if (force || !universalState) {
             onReadyChange(false, eventProps);
             this.props.universalSetRequest(ukey);
             Promise.resolve(promiseCreator(
@@ -134,7 +134,7 @@ const universal = (
           } = universalState;
           const params = {
             [`${key}Reload`]: () => {
-              this.unload();
+              this.load(true);
             },
             [key]: result,
             [`${key}Ready`]: !request,
