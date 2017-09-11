@@ -112,7 +112,8 @@ const universal = (
                 onDone(result, eventProps);
                 return this.props.universalSetResult(ukey, result);
               })
-              .catch((error) => {
+              .catch((errorArg) => {
+                const error = typeof errorArg === 'string' ? new Error(errorArg) : errorArg;
                 onError(error, eventProps);
                 this.props.universalSetError(ukey, error ? errorToJSON(error) : { message: 'Error' });
               }).then(() => onReadyChange(true, eventProps));
@@ -132,6 +133,9 @@ const universal = (
             request,
           } = universalState;
           const params = {
+            reloadUniversal: () => {
+              this.unload();
+            },
             [key]: result,
             [`${key}Ready`]: !request,
           };

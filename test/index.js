@@ -74,6 +74,47 @@ describe('universal redux.', () => {
     // ready
     setImmediate(() => renderToString(Element));
   });
+  it('should reload params', done => {
+    const keyParam = 'testParam';
+    const keyParam2 = 'testParam2';
+
+    const reparams = [
+      keyParam2,
+      keyParam,
+    ];
+    const testReloader = universalContainer(
+      'testKey',
+      ({ myParam }) => myParam,
+      myParam => Promise.resolve(reparams.pop()),
+    );
+
+    const Component = testReloader(({ testKey, reloadUniversal }) => {
+      if (testKey) {
+        if (testKey === keyParam) {
+          reloadUniversal();
+          return null;
+        }
+        assert.equal(testKey, keyParam2);
+        done();
+      }
+      return null;
+    });
+    const store = createStore(reducer);
+    const Element = (
+      <Provider store={store}>
+        <Component store={store} myParam={keyParam} />
+      </Provider>
+    );
+    // setup
+    renderToString(Element);
+    // ready
+    setImmediate(() => {
+      renderToString(Element);
+      // resetup
+      renderToString(Element);
+      setImmediate(() => renderToString(Element));
+    });
+  });
   it('loader should resolve valid html', done => {
     const keyParam = 'testParam';
     const Component = testLoader(({ testKey }) => {
