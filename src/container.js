@@ -133,7 +133,7 @@ const universal = (
             request,
           } = universalState;
           const params = {
-            reloadUniversal: () => {
+            [`${key}Reload`]: () => {
               this.unload();
             },
             [key]: result,

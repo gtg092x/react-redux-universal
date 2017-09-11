@@ -88,10 +88,10 @@ describe('universal redux.', () => {
       myParam => Promise.resolve(reparams.pop()),
     );
 
-    const Component = testReloader(({ testKey, reloadUniversal }) => {
+    const Component = testReloader(({ testKey, testKeyReload }) => {
       if (testKey) {
         if (testKey === keyParam) {
-          reloadUniversal();
+          testKeyReload();
           return null;
         }
         assert.equal(testKey, keyParam2);

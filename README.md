@@ -121,7 +121,7 @@ The default export for `react-redux-universal` is the HOC that links your async 
     - `{keyname}` - the result of the promise
     - `{keyname}Ready` - `true` if the promise is completed, `false` otherwise
     - `{keyname}Error` - an error object if the promise rejects
-    - `reloadUniversal` - clears the cache and reloads
+    - `{keyname}Reload()` - clears the cache and reloads
 - `mapPropsToParams` This method that accepts `(props, context)` and returns a value to be the params passed to the `promiseCreator`. This will be called on initialization and every prop change. If the result of this function changes, the `promiseCreator` will be called again.
 - `promiseCreator` A function that accepts the result of `mapPropsToParams` and returns a thenable or constant value. The results of this are passed to the component as a prop and stored in a redux store for tranfer between server and client. For convenience, `dispatch` and `context` are passed to this method as well.
 - `[config]`
