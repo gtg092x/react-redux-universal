@@ -15,13 +15,11 @@ export default function appServer(renderer, store, timeout = 30000, next = taut)
     let to;
     let unsub;
     let dispatched = false;
-    let renderCount = 1;
     const checkSub = () => {
       const finalState = store.getState();
       const requests = getRequests(selectUniversal(finalState));
-      if (requests.length === 0 || !next(finalState, renderCount)) {
+      if (requests.length === 0 || !next(finalState)) {
         try {
-          renderCount += 1;
           const nextHtml = dispatched ? renderer({ store }) : html;
           if (dispatched) {
             // if you dispatched during render will do one final render after requests have resolved
