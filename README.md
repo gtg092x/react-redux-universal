@@ -67,6 +67,8 @@ ReactDOM.render(
 
 ### Server
 
+#### Connect/Express
+
 ```js
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
@@ -106,6 +108,44 @@ export default function server(req, res) {
     }).catch((err) => {
       // possible timeout or error while rendering
     });
+}
+```
+
+#### Koa
+
+```js
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import { Provider } from 'react-redux';
+import App from './App';
+import createAppStore from './redux';
+import { loader } from 'react-redux-universal';
+
+const TIMEOUT = 3000;
+const INITIAL_STATE = {};
+const INITIAL_PROPS = {};
+
+// pass to koa.use
+export default async function server(ctx) {
+  const store = createAppStore(INITIAL_STATE);
+  const { state, html } = await loader(
+    () => ReactDOMServer.renderToString(
+      <Provider store={store}>
+        <App props={INITIAL_PROPS} />
+      </Provider>
+    ),
+    store,
+    TIMEOUT,
+  );
+  
+  ctx.body = `<!DOCTYPE html>
+<html lang="en">
+ <body>
+   <div id="react-root">${html}</div>
+   <script type="text/javascript">var REDUX_STATE=${JSON.stringify(state)}</script>
+   <script src="/dist/app.js"></script>
+ </body>
+</html>`;
 }
 ```
 
