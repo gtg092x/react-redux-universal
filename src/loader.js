@@ -23,7 +23,7 @@ export default function appServer(renderer, store, timeout = 30000, next = taut)
         done();
         try {
           const nextHtml = dispatched ? renderer({ store }) : html;
-          resolve({ html: nextHtml, state: finalState });
+          resolve({ html: nextHtml, state: store.getState() });
         } catch (e) {
           reject(e);
         }
