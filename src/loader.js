@@ -26,7 +26,8 @@ export default function appServer(renderer, store, timeout = 30000, next = taut)
             // giving you a chance to mount child containers
             dispatched = false;
             html = nextHtml;
-            return setImmediate(checkSub);
+            setImmediate(checkSub);
+            return;
           }
           clearTimeout(to);
           unsub();
