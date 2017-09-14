@@ -36,8 +36,6 @@ export default function appServer(renderer, store, timeout = 30000, next = taut)
           unsub();
           reject(e);
         }
-      } else {
-        html = null;
       }
     };
     unsub = store.subscribe(() => {
