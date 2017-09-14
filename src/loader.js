@@ -11,27 +11,37 @@ const taut = () => true;
 
 export default function appServer(renderer, store, timeout = 30000, next = taut) {
   return new Promise((resolve, reject) => {
-    let done;
     let html;
     let to;
+    let unsub;
     let dispatched = false;
+    let renderCount = 1;
     const checkSub = () => {
       const finalState = store.getState();
       const requests = getRequests(selectUniversal(finalState));
-      if (requests.length === 0 || !next(finalState)) {
-        clearTimeout(to);
-        done();
+      if (requests.length === 0 || !next(finalState, renderCount)) {
         try {
+          renderCount += 1;
           const nextHtml = dispatched ? renderer({ store }) : html;
+          if (dispatched) {
+            // if you dispatched during render will do one final render after requests have resolved
+            // giving you a chance to mount child containers
+            dispatched = false;
+            html = nextHtml;
+            return setImmediate(checkSub);
+          }
+          clearTimeout(to);
+          unsub();
           resolve({ html: nextHtml, state: finalState });
         } catch (e) {
+          unsub();
           reject(e);
         }
       } else {
         html = null;
       }
     };
-    done = store.subscribe(() => {
+    unsub = store.subscribe(() => {
       dispatched = true;
       setImmediate(checkSub);
     });
@@ -43,7 +53,7 @@ export default function appServer(renderer, store, timeout = 30000, next = taut)
     }
     if (timeout > 0) {
       to = setTimeout(() => {
-        done();
+        unsub();
         reject(new Error(`Timeout of ${timeout}ms exceeded.`));
       }, timeout);
     }
