@@ -17,7 +17,9 @@ export default async function appServer(renderer, store, timeout = 30000, next =
 
   if (timeout > 0) {
     to = setTimeout(() => {
-      unsubDispatchWatch && unsubDispatchWatch();
+      if (unsubDispatchWatch) {
+        unsubDispatchWatch();
+      }
       throw new Error(`Timeout of ${timeout}ms exceeded.`);
     }, timeout);
   }
