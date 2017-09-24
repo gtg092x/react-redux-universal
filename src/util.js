@@ -5,5 +5,7 @@ export const omit = (obj, key) => {
   ), {});
 };
 
+export const isFunction = fn => fn && fn.call && fn.apply;
+
 export const values = (obj = {}) => Object.keys(obj)
   .reduce((memo, key) => ([...memo, obj[key]]), []);

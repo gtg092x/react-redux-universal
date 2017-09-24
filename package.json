@@ -1,6 +1,6 @@
 {
   "name": "react-redux-universal",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "scripts": {
     "dev": "babel-node samples/web/server",
     "dev:build": "babel samples/web --out-dir samples/web-build",

@@ -1,4 +1,4 @@
-import { values } from './util';
+import { values, isFunction } from './util';
 
 const selectUniversal = state => state.universal;
 
@@ -9,11 +9,20 @@ const getRequests = universal => getUniversalCaches(universal).filter(hash => !!
 
 const taut = () => true;
 
-export default async function appServer(renderer, store, timeout = 30000, next = taut) {
+export default async function appServer(renderer, store, timeout = 30000, config = {}) {
+  let {
+    next = taut,
+    ensureRender = () => false,
+  } = isFunction(config) ? { next: config } : config;
+  if (!isFunction(ensureRender)) {
+    const ensureRenderConstant = ensureRender;
+    ensureRender = () => ensureRenderConstant;
+  }
   let html;
   let to;
   let unsubDispatchWatch = null;
   let dispatched = false;
+  let renderCount = 1;
 
   if (timeout > 0) {
     to = setTimeout(() => {
@@ -33,8 +42,9 @@ export default async function appServer(renderer, store, timeout = 30000, next =
     const requests = getRequests(selectUniversal(finalState));
     if (requests.length === 0 || !next(finalState)) {
       try {
-        const nextHtml = dispatched ? renderer({ store }) : html;
+        let nextHtml = dispatched ? renderer({ store }) : html;
         if (dispatched) {
+          renderCount += 1;
           // if you dispatched during render will do one final render after requests have resolved
           // giving you a chance to mount child containers
           dispatched = false;
@@ -43,6 +53,9 @@ export default async function appServer(renderer, store, timeout = 30000, next =
         }
         clearTimeout(to);
         unsubDispatchWatch();
+        if (ensureRender(renderCount)) {
+          nextHtml = renderer({ store });
+        }
         return { html: nextHtml, state: finalState };
       } catch (e) {
         unsubDispatchWatch();

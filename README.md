@@ -182,8 +182,11 @@ This will attempt to load your app and resolve as soon as all mounted `universal
 - `getRenderer` This is typically `() => ReactDOMServer.renderToString(<App />)`, however, you can pass any render method you like as long as it attempts to render your react app. If you have mounted universal components, this will likely be called twice but could be called more. Otherwise, this will be called once.
 - `store` Your redux store. You'll need to initialize this outside of your app. *Note: this is only the case for server side rendering.*
 - `[<timeout>]` A timeout for your app's load. The loader will reject once this time has expired. Pass `-1` if you do not want your app to timeout. Default is `3000` (3 seconds).
-- `[<next(state)>]` A function that will call with every redux state change. If this function returns `false`, all subscriptions will be released and the app will immediately render. Defaults to `() => true`.
-  - Combined with the history api, this is useful for redirects.
+- `[<config>]` Additional Configuration.
+  - `[config.next(state)]` A function that will call with every redux state change. If this function returns `false`, all subscriptions will be released and the app will immediately render. Defaults to `() => true`.
+    - Combined with the history api, this is useful for redirects.
+  - `[config.ensureRender(renderCount)]` A function that will call right before the loader returns HTML. If this returns true, the loader will render the component one last time. This is useful for child components that change the redux store and expect the parent components to update.
+    - A constant `true` or `false` can be passed instead of a function to always or never render once more before delivery.
 
 ### Actions
 
