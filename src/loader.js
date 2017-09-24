@@ -11,6 +11,7 @@ const taut = () => true;
 
 export default async function appServer(renderer, store, timeout = 30000, config = {}) {
   let {
+    // eslint-disable-next-line prefer-const
     next = taut,
     ensureRender = () => false,
   } = isFunction(config) ? { next: config } : config;
