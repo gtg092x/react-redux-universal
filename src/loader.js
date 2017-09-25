@@ -60,6 +60,7 @@ export default async function appServer(renderer, store, timeout = 30000, config
         return { html: nextHtml, state: finalState };
       } catch (e) {
         unsubDispatchWatch();
+        clearTimeout(to);
         throw e;
       }
     } else {
@@ -76,6 +77,7 @@ export default async function appServer(renderer, store, timeout = 30000, config
   try {
     html = renderer({ store });
   } catch (e) {
+    clearTimeout(to);
     throw e;
   }
   return tryRender();
