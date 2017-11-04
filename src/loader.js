@@ -24,13 +24,16 @@ export default async function appServer(renderer, store, timeout = 30000, config
   let unsubDispatchWatch = null;
   let dispatched = false;
   let renderCount = 1;
+  let resolved = false;
 
   if (timeout > 0) {
     to = setTimeout(() => {
       if (unsubDispatchWatch) {
         unsubDispatchWatch();
       }
-      throw new Error(`Timeout of ${timeout}ms exceeded.`);
+      if (!resolved) {
+        throw new Error(`Timeout of ${timeout}ms exceeded.`);
+      }
     }, timeout);
   }
 
@@ -57,10 +60,12 @@ export default async function appServer(renderer, store, timeout = 30000, config
         if (ensureRender(renderCount)) {
           nextHtml = renderer({ store });
         }
+        resolved = true;
         return { html: nextHtml, state: finalState };
       } catch (e) {
         unsubDispatchWatch();
         clearTimeout(to);
+        resolved = true;
         throw e;
       }
     } else {
@@ -78,7 +83,12 @@ export default async function appServer(renderer, store, timeout = 30000, config
     html = renderer({ store });
   } catch (e) {
     clearTimeout(to);
+    resolved = true;
     throw e;
   }
-  return tryRender();
+  return tryRender().catch((error) => {
+    clearTimeout(to);
+    resolved = true;
+    throw error;
+  });
 }
